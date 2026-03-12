@@ -104,7 +104,7 @@ def get_trending_tokens(
     """Retrieve the latest trending tokens on the given chain from DEX data."""
     chain = chain.lower()
     trending_tokens = get_trending_tokens_from_coingecko(chain)[:9]
-    return f"""Trending tokens: {trending_tokens}. In your answer, include the ID of each token you mention in the following format: ```token:<insert token_id>```, and the name and symbol too."""
+    return f"""Trending tokens: {trending_tokens}. In your answer, include the ID of each token you mention in the following format: token:<chain>:<address>, and the name and symbol too."""
 
 
 @tool

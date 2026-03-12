@@ -39,46 +39,29 @@ def extract_patterns(
     text: str, pattern_type: str, remove_pattern=False
 ) -> Tuple[str, List[str]]:
     """
-    Extract patterns of the form ```pattern_type:ID``` from text and return original text and extracted IDs.
+    Extract patterns of the form pattern_type:chain:address from text.
+
+    Matches bare token:chain:address patterns as well as backtick-wrapped variants.
 
     Args:
         text: The text to extract patterns from
-        pattern_type: The type of pattern to extract (e.g. 'pool', 'token')
+        pattern_type: The type of pattern to extract (e.g. 'token', 'swap')
         remove_pattern: If True, remove the pattern markers from the text
 
     Returns:
         Tuple containing (processed_text, extracted_ids)
     """
-    pattern_ids = []
-
-    # Find all occurrences of ```pattern_type:ID``` patterns (with or without backticks)
-    # Primary format: ```token:ID``` (triple backticks)
-    pattern = f"```{pattern_type}:([^`]+)```"
+    # Match pattern_type:chain:address — with or without backticks
+    # chain is lowercase letters, address is alphanumeric 20+ chars
+    pattern = f"(?:`{{1,3}})?{pattern_type}:([a-zA-Z]+:[a-zA-Z0-9]{{20,}})(?:`{{1,3}})?"
     matches = re.finditer(pattern, text)
 
-    # Fallback: match bare pattern_type:chain:address without backticks
-    # This handles LLMs that don't wrap in backticks
-    fallback_pattern = (
-        f"(?<!`)\\b{pattern_type}:([a-zA-Z]+:[a-zA-Z0-9]{{20,}})\\b(?!`)"
-    )
-    fallback_matches = re.finditer(fallback_pattern, text)
-
+    pattern_ids = []
     for match in matches:
         pattern_ids.append(match.group(1))
 
-    # Only use fallback if primary pattern found nothing
-    if not pattern_ids:
-        for match in fallback_matches:
-            pattern_ids.append(match.group(1))
-        fallback_used = True
-    else:
-        fallback_used = False
-
     if remove_pattern:
-        # Remove all pattern markers from the text
         cleaned_text = re.sub(pattern, "", text)
-        if fallback_used and pattern_ids:
-            cleaned_text = re.sub(fallback_pattern, "", cleaned_text)
         return cleaned_text, pattern_ids
     else:
         return text, pattern_ids
