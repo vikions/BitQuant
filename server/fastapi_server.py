@@ -29,6 +29,7 @@ from api.api_types import (
     Message,
     TokenMetadata,
     SolanaVerifyRequest,
+    EvmVerifyRequest,
     Context,
     UserMessage,
     ProcessSwapRequest,
@@ -260,6 +261,25 @@ def create_fastapi_app() -> FastAPI:
             raise HTTPException(status_code=400, detail=str(e))
         except Exception as e:
             logging.error(f"Error verifying SIWX signature: {e}")
+            raise HTTPException(status_code=500, detail="Internal server error")
+
+    @app.post("/api/verify/ethereum")
+    async def verify_evm_signature(request: Request):
+        try:
+            request_data = await request.json()
+            verify_request = EvmVerifyRequest(**request_data)
+
+            token = await asyncio.to_thread(
+                service.verify_evm_signature, verify_request
+            )
+            return {"token": token}
+
+        except ValidationError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except ValueError as e:
+            raise HTTPException(status_code=401, detail=str(e))
+        except Exception as e:
+            logging.error(f"Error verifying EVM signature: {e}")
             raise HTTPException(status_code=500, detail="Internal server error")
 
     @app.get("/api/healthcheck")

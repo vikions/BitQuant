@@ -140,6 +140,12 @@ class SolanaVerifyRequest(BaseModel):
     signature: str
 
 
+class EvmVerifyRequest(BaseModel):
+    address: str
+    message: str
+    signature: str
+
+
 class ProcessSwapRequest(BaseModel):
     txid: str
     chain: str = "solana"
