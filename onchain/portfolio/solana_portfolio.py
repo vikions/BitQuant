@@ -25,7 +25,7 @@ class PortfolioFetcher:
 
     @alru_cache(maxsize=1_000_000, ttl=60 * 60)
     async def get_portfolio(self, wallet_address: str) -> Portfolio:
-        if wallet_address == "":
+        if wallet_address == "" or wallet_address.startswith("0x"):
             return Portfolio(holdings=[], total_value_usd=0)
 
         """Get the complete portfolio of token holdings for a wallet address."""
