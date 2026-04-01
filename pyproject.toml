@@ -31,6 +31,9 @@ exclude = [
     '.venv/',  # Common alternative venv directory name
 ]
 
+[tool.uv]
+exclude-newer = "7d"
+
 [[tool.mypy.overrides]]
 module = [
     "opengradient",
